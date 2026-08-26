@@ -1,0 +1,43 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  lang: 'pt' | 'en';
+  canonicalSlug?: string;
+}
+
+const { title, description, lang, canonicalSlug } = Astro.props;
+const siteTitle = `${title} | Blog Pessoal`;
+const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+
+const altPtUrl = canonicalSlug ? `${baseUrl}pt/posts/${canonicalSlug}` : `${baseUrl}pt/`;
+const altEnUrl = canonicalSlug ? `${baseUrl}en/posts/${canonicalSlug}` : `${baseUrl}en/`;
+---
+
+<!-- Global Metadata -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href={`${baseUrl}favicon.svg`} />
+<meta name="generator" content={Astro.generator} />
+
+<!-- Canonical & Hreflang SEO -->
+<link rel="alternate" hreflang="pt" href={altPtUrl} />
+<link rel="alternate" hreflang="en" href={altEnUrl} />
+<link rel="alternate" hreflang="x-default" href={altPtUrl} />
+
+<!-- Primary Meta Tags -->
+<title>{siteTitle}</title>
+<meta name="title" content={siteTitle} />
+<meta name="description" content={description} />
+
+<!-- Inline Theme Script to Prevent FOUC (Flash of Unstyled Content) -->
+<script is:inline>
+  (function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>

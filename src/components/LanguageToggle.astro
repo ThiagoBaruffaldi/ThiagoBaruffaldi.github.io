@@ -1,0 +1,107 @@
+---
+interface Props {
+  currentLang: 'pt' | 'en';
+  canonicalSlug?: string;
+  hasAlternateLang?: boolean;
+}
+
+const { currentLang, canonicalSlug, hasAlternateLang = true } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+
+// Construir os URLs para PT e EN
+let ptUrl = `${baseUrl}pt/`;
+let enUrl = `${baseUrl}en/`;
+
+if (canonicalSlug) {
+  ptUrl = `${baseUrl}pt/posts/${canonicalSlug}`;
+  enUrl = `${baseUrl}en/posts/${canonicalSlug}`;
+}
+---
+
+<div class="lang-toggle-container">
+  {hasAlternateLang ? (
+    <div class="lang-segmented-control" role="group" aria-label="Alternar idioma">
+      <a
+        href={ptUrl}
+        class={`lang-btn ${currentLang === 'pt' ? 'active' : ''}`}
+        data-lang="pt"
+        aria-current={currentLang === 'pt' ? 'page' : undefined}
+      >
+        PT
+      </a>
+      <span class="lang-divider">|</span>
+      <a
+        href={enUrl}
+        class={`lang-btn ${currentLang === 'en' ? 'active' : ''}`}
+        data-lang="en"
+        aria-current={currentLang === 'en' ? 'page' : undefined}
+      >
+        EN
+      </a>
+    </div>
+  ) : (
+    <span class="lang-single-badge" title="Este post está disponível apenas em um idioma">
+      {currentLang.toUpperCase()}
+    </span>
+  )}
+</div>
+
+<style>
+  .lang-segmented-control {
+    display: flex;
+    align-items: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    padding: 0.2rem 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .lang-btn {
+    color: var(--text-muted);
+    padding: 0.2rem 0.4rem;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+  }
+
+  .lang-btn:hover {
+    color: var(--text-primary);
+  }
+
+  .lang-btn.active {
+    color: var(--accent-primary);
+    font-weight: 700;
+  }
+
+  .lang-divider {
+    color: var(--border-color);
+    margin: 0 0.25rem;
+    user-select: none;
+  }
+
+  .lang-single-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.6rem;
+    background-color: var(--badge-bg);
+    color: var(--badge-text);
+    border-radius: var(--radius-full);
+  }
+</style>
+
+<script>
+  function setupLangToggle() {
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const lang = (e.currentTarget as HTMLElement).getAttribute('data-lang');
+        if (lang) {
+          localStorage.setItem('preferred-lang', lang);
+        }
+      });
+    });
+  }
+
+  setupLangToggle();
+  document.addEventListener('astro:after-swap', setupLangToggle);
+</script>

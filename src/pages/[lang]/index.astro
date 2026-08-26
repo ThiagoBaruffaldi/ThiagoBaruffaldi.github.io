@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getPostsByLang } from '../../utils/posts';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'pt' } },
+    { params: { lang: 'en' } },
+  ];
+}
+
+const { lang } = Astro.params as { lang: 'pt' | 'en' };
+const threadFilter = Astro.url.searchParams.get('thread') || undefined;
+
+const posts = await getPostsByLang(lang, threadFilter);
+const pageTitle = threadFilter 
+  ? (lang === 'pt' ? `Posts em #${threadFilter}` : `Posts in #${threadFilter}`)
+  : (lang === 'pt' ? 'Últimas publicações' : 'Latest Posts');
+---
+
+<BaseLayout title={pageTitle} lang={lang} activeThread={threadFilter}>
+  <section class="posts-section">
+    <header class="section-header" style="margin-bottom: 1.5rem;">
+      <h1 style="font-size: 1.75rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+        {pageTitle}
+        {threadFilter && (
+          <a
+            href={`${import.meta.env.BASE_URL}${lang}/`}
+            style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted); text-decoration: underline;"
+          >
+            ({lang === 'pt' ? 'limpar filtro' : 'clear filter'})
+          </a>
+        )}
+      </h1>
+    </header>
+
+    {posts.length === 0 ? (
+      <div style="padding: 3rem 1rem; text-align: center; color: var(--text-muted); background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <p>{lang === 'pt' ? 'Nenhum post encontrado para este tópico.' : 'No posts found for this thread.'}</p>
+      </div>
+    ) : (
+      <div class="posts-grid">
+        {posts.map(post => (
+          <PostCard post={post} />
+        ))}
+      </div>
+    )}
+  </section>
+</BaseLayout>

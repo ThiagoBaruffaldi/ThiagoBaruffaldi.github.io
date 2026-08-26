@@ -1,0 +1,128 @@
+---
+interface Props {
+  currentLang: 'pt' | 'en';
+}
+
+const { currentLang } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+const placeholderText = currentLang === 'pt' ? 'Buscar posts...' : 'Search posts...';
+const noResultsText = currentLang === 'pt' ? 'Nenhum post encontrado' : 'No posts found';
+---
+
+<div class="search-container">
+  <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="8"></circle>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+  <input
+    type="search"
+    id="site-search-input"
+    class="search-input"
+    placeholder={placeholderText}
+    aria-label={placeholderText}
+    autocomplete="off"
+    data-lang={currentLang}
+    data-baseurl={baseUrl}
+  />
+  
+  <div id="search-results-dropdown" class="search-results-dropdown" role="listbox">
+    <!-- Resultados serão injetados dinamicamente via JS cliente -->
+  </div>
+</div>
+
+<script>
+  interface SearchItem {
+    slug: string;
+    lang: 'pt' | 'en';
+    title: string;
+    summary: string;
+    bodyText: string;
+    threads: string[];
+  }
+
+  let searchIndex: SearchItem[] = [];
+  let isIndexLoaded = false;
+
+  async function loadSearchIndex(baseUrl: string) {
+    if (isIndexLoaded) return;
+    try {
+      const res = await fetch(`${baseUrl}search-index.json`);
+      if (res.ok) {
+        searchIndex = await res.json();
+        isIndexLoaded = true;
+      }
+    } catch (err) {
+      console.error('Failed to load search index', err);
+    }
+  }
+
+  function initSearch() {
+    const input = document.getElementById('site-search-input') as HTMLInputElement | null;
+    const dropdown = document.getElementById('search-results-dropdown');
+    if (!input || !dropdown) return;
+
+    const lang = input.getAttribute('data-lang') || 'pt';
+    const baseUrl = input.getAttribute('data-baseurl') || '/';
+
+    input.addEventListener('focus', () => loadSearchIndex(baseUrl));
+
+    input.addEventListener('input', async (e) => {
+      const query = (e.target as HTMLInputElement).value.trim().toLowerCase();
+      if (!query) {
+        dropdown.classList.remove('active');
+        dropdown.innerHTML = '';
+        return;
+      }
+
+      await loadSearchIndex(baseUrl);
+
+      const filtered = searchIndex.filter(item => {
+        if (item.lang !== lang) return false;
+        return (
+          item.title.toLowerCase().includes(query) ||
+          item.summary.toLowerCase().includes(query) ||
+          item.bodyText.toLowerCase().includes(query) ||
+          item.threads.some(t => t.toLowerCase().includes(query))
+        );
+      });
+
+      if (filtered.length === 0) {
+        const noResults = lang === 'pt' ? 'Nenhum resultado encontrado' : 'No results found';
+        dropdown.innerHTML = `<div class="search-empty-state">${noResults}</div>`;
+      } else {
+        dropdown.innerHTML = filtered.map(item => `
+          <a href="${baseUrl}${lang}/posts/${item.slug}" class="search-result-item" role="option">
+            <div class="search-result-title">${escapeHtml(item.title)}</div>
+            <div class="search-result-summary">${escapeHtml(item.summary)}</div>
+          </a>
+        `).join('');
+      }
+
+      dropdown.classList.add('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target as Node) && !dropdown.contains(e.target as Node)) {
+        dropdown.classList.remove('active');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        dropdown.classList.remove('active');
+      }
+    });
+  }
+
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  initSearch();
+  document.addEventListener('astro:after-swap', initSearch);
+</script>

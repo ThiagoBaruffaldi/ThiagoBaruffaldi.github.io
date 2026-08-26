@@ -1,0 +1,18 @@
+---
+interface Props {
+  currentLang: 'pt' | 'en';
+}
+
+const { currentLang } = Astro.props;
+const year = new Date().getFullYear();
+const footerText = currentLang === 'pt' 
+  ? `© ${year} Thoughts Blog. Desenvolvido com Astro estático.`
+  : `© ${year} Thoughts Blog. Built with static Astro.`;
+---
+
+<footer class="site-footer">
+  <p>{footerText}</p>
+  <div class="footer-links">
+    <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub Pages</a>
+  </div>
+</footer>

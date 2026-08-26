@@ -1,0 +1,47 @@
+---
+import type { ProcessedPost } from '../utils/posts';
+
+interface Props {
+  post: ProcessedPost;
+}
+
+const { post } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+const formattedDate = new Date(post.date).toLocaleDateString(post.lang === 'pt' ? 'pt-BR' : 'en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<article class="post-card">
+  <a href={`${baseUrl}${post.lang}/posts/${post.slug}`} class="post-card-banner-wrapper" tab-index="-1">
+    {post.bannerUrl ? (
+      <img src={post.bannerUrl} alt={`Banner do post: ${post.title}`} class="post-card-banner" loading="lazy" />
+    ) : (
+      <div class="banner-placeholder">
+        <span>Blog Post</span>
+      </div>
+    )}
+  </a>
+
+  <div class="post-card-content">
+    <div class="post-card-meta">
+      <time datetime={post.date.toISOString()}>{formattedDate}</time>
+      <span>•</span>
+      {post.threads.map(t => (
+        <span class="thread-tag">#{t}</span>
+      ))}
+    </div>
+
+    <h2 class="post-card-title">
+      <a href={`${baseUrl}${post.lang}/posts/${post.slug}`}>
+        {post.title}
+      </a>
+    </h2>
+
+    <p class="post-card-summary">
+      {post.summary}
+    </p>
+  </div>
+</article>
