@@ -124,6 +124,10 @@ button, input {
   gap: 2rem;
 }
 
+.sidebar-overlay {
+  display: none;
+}
+
 .sidebar-brand {
   display: flex;
   align-items: center;
