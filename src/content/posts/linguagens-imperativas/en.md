@@ -1,12 +1,8 @@
 ---
-title: "Building this Minimalist Blog from Scratch with Astro, i18n & GitHub Pages"
+title: "aaaaaa"
 date: 2026-08-26
-threads: ["projetos", "aprendizado"]
+threads: [ "aprendizado"]
 summary: "A deep dive into how this blog was designed, architected, and built without a backend, featuring thread validation and seamless i18n."
----
-
-Welcome to my profile! My name is Thiago, I'm a student of Computer Science and a trainee in IT Support in a private company. The idea of this post is to help me remember the content before taking the test I'll have on, you'll never guess: this Friday! I also hope that it helps other people interested in the subject.
-
 ---
 
 ## Concept
