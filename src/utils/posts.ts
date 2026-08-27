@@ -12,8 +12,12 @@ export interface ProcessedPost {
   hasAlternateLang: boolean;
 }
 
-// Global cache for images in content directory
-const bannerImages = import.meta.glob('/src/content/posts/**/*.{jpg,jpeg,png,webp,svg}', { eager: true, import: 'default' });
+// Import banners as public URLs so they work in both dev and static builds.
+const bannerImages = import.meta.glob('/src/content/posts/**/banner.{jpg,jpeg,png,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+});
 
 /**
  * Normaliza o ID de uma entrada de coleção para extrair o slug da pasta e o idioma.
@@ -32,7 +36,11 @@ export function parsePostId(id: string): { slug: string; lang: 'pt' | 'en' } {
  */
 export function getPostBannerUrl(slug: string): string | null {
   for (const path in bannerImages) {
-    if (path.includes(`/src/content/posts/${slug}/banner.`)) {
+    if (path.endsWith(`/src/content/posts/${slug}/banner.svg`) ||
+        path.endsWith(`/src/content/posts/${slug}/banner.png`) ||
+        path.endsWith(`/src/content/posts/${slug}/banner.jpg`) ||
+        path.endsWith(`/src/content/posts/${slug}/banner.jpeg`) ||
+        path.endsWith(`/src/content/posts/${slug}/banner.webp`)) {
       return bannerImages[path] as string;
     }
   }
