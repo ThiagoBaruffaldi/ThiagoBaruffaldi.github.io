@@ -1,8 +1,8 @@
 ---
-title: "aaaaaa"
+title: "Imperative Programming Paradigm"
 date: 2026-08-26
 threads: [ "aprendizado"]
-summary: "A deep dive into how this blog was designed, architected, and built without a backend, featuring thread validation and seamless i18n."
+summary: "A little study session about Imperative Programming"
 ---
 
 Imperative Programming is the first programming paradigm that is studied in college, even if it's never mentioned by this term. You'll recognize it by the programming languages that are created from it —[^1] C, Perl, JavaScript, etc — due to their simplicity and "direct" way of writing instructions: copying the imperative mood in natural languages ("_do this_", or "_do that in this order_"), telling the computer what (and **how**) to do, step by step, using variables, and **altering the state of the process** while executing. 
